@@ -84,6 +84,7 @@ export default class Async extends Component {
 	}
 
 	loadOptions (inputValue) {
+		console.log("testoptionx")
 		const { loadOptions } = this.props;
 		const cache = this._cache;
 
@@ -163,7 +164,7 @@ export default class Async extends Component {
 		if (this.props.onBlurResetsInput) {
 			this.loadOptions('');
 		}
-	}
+ 	}
 
 	inputValue() {
 		if (this.select) {
@@ -192,6 +193,7 @@ export default class Async extends Component {
 	}
 
 	render () {
+		console.log("BLURX")
 		const { children, loadingPlaceholder, placeholder } = this.props;
 		const { isLoading, options } = this.state;
 

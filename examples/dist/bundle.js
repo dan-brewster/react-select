@@ -13,8 +13,6 @@ var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_ag
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
@@ -45,6 +43,8 @@ var propTypes = {
 	_propTypes2['default'].string, _propTypes2['default'].node]),
 	loadOptions: _propTypes2['default'].func.isRequired, // callback to load options asynchronously; (inputValue: string, callback: Function): ?Promise
 	multi: _propTypes2['default'].bool, // multi-value input
+	onBlur: _react2['default'].PropTypes.func, // onBlur handler: function (event) {}
+	onBlurResetsInput: _react2['default'].PropTypes.bool, // whether input is cleared on blur
 	options: _propTypes2['default'].array.isRequired, // array of options
 	placeholder: _propTypes2['default'].oneOfType([// field placeholder, displayed when there's no value (shared with Select)
 	_propTypes2['default'].string, _propTypes2['default'].node]),
@@ -86,6 +86,7 @@ var Async = (function (_Component) {
 		};
 
 		this._onInputChange = this._onInputChange.bind(this);
+		this._onBlur = this._onBlur.bind(this);
 	}
 
 	_createClass(Async, [{
@@ -98,16 +99,13 @@ var Async = (function (_Component) {
 			}
 		}
 	}, {
-		key: 'componentWillUpdate',
-		value: function componentWillUpdate(nextProps, nextState) {
-			var _this = this;
-
-			var propertiesToSync = ['options'];
-			propertiesToSync.forEach(function (prop) {
-				if (_this.props[prop] !== nextProps[prop]) {
-					_this.setState(_defineProperty({}, prop, nextProps[prop]));
-				}
-			});
+		key: 'componentWillReceiveProps',
+		value: function componentWillReceiveProps(nextProps) {
+			if (nextProps.options !== this.props.options) {
+				this.setState({
+					options: nextProps.options
+				});
+			}
 		}
 	}, {
 		key: 'clearOptions',
@@ -117,8 +115,9 @@ var Async = (function (_Component) {
 	}, {
 		key: 'loadOptions',
 		value: function loadOptions(inputValue) {
-			var _this2 = this;
+			var _this = this;
 
+			console.log("testoptionx");
 			var loadOptions = this.props.loadOptions;
 
 			var cache = this._cache;
@@ -132,8 +131,8 @@ var Async = (function (_Component) {
 			}
 
 			var callback = function callback(error, data) {
-				if (callback === _this2._callback) {
-					_this2._callback = null;
+				if (callback === _this._callback) {
+					_this._callback = null;
 
 					var options = data && data.options || [];
 
@@ -141,7 +140,7 @@ var Async = (function (_Component) {
 						cache[inputValue] = options;
 					}
 
-					_this2.setState({
+					_this.setState({
 						isLoading: false,
 						options: options
 					});
@@ -191,6 +190,16 @@ var Async = (function (_Component) {
 			return this.loadOptions(inputValue);
 		}
 	}, {
+		key: '_onBlur',
+		value: function _onBlur(event) {
+			if (this.props.onBlur) {
+				this.props.onBlur(event);
+			}
+			if (this.props.onBlurResetsInput) {
+				this.loadOptions('');
+			}
+		}
+	}, {
 		key: 'inputValue',
 		value: function inputValue() {
 			if (this.select) {
@@ -225,8 +234,9 @@ var Async = (function (_Component) {
 	}, {
 		key: 'render',
 		value: function render() {
-			var _this3 = this;
+			var _this2 = this;
 
+			console.log("BLURX");
 			var _props3 = this.props;
 			var children = _props3.children;
 			var loadingPlaceholder = _props3.loadingPlaceholder;
@@ -240,13 +250,14 @@ var Async = (function (_Component) {
 				placeholder: isLoading ? loadingPlaceholder : placeholder,
 				options: isLoading && loadingPlaceholder ? [] : options,
 				ref: function ref(_ref) {
-					return _this3.select = _ref;
+					return _this2.select = _ref;
 				},
+				onBlur: this._onBlur,
 				onChange: function onChange(newValues) {
-					if (_this3.props.multi && _this3.props.value && newValues.length > _this3.props.value.length) {
-						_this3.clearOptions();
+					if (_this2.props.multi && _this2.props.value && newValues.length > _this2.props.value.length) {
+						_this2.clearOptions();
 					}
-					_this3.props.onChange(newValues);
+					_this2.props.onChange(newValues);
 				}
 			};
 
